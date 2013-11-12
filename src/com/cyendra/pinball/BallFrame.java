@@ -11,6 +11,7 @@ public class BallFrame extends JFrame {
 	
 	private final int BALLPANEL_WIDTH = 307;
 	private final int BALLPANEL_HEIGHT = 400;
+	private final int FPS = 60;
 	
 	private BallPanel ballPanel = null;
 	private BallService service = null;
@@ -38,7 +39,7 @@ public class BallFrame extends JFrame {
 			timer.restart();
 		}
 		else {
-			timer = new Timer(100,task);
+			timer = new Timer((int)(1000/FPS),task);
 			timer.start();
 		}
 		
@@ -48,7 +49,11 @@ public class BallFrame extends JFrame {
 		if (klarr.length == 0) {
 			KeyListener keyAdapter = new KeyAdapter() {
 				public void keyPressed(KeyEvent ke) {
-					service.setStickPos(ke);
+					service.setKeyPress(ke);
+					//service.setStickPos(ke);
+				}
+				public void keyReleased(KeyEvent ke) {
+					service.setKeyReleas(ke);
 				}
 			};
 			this.addKeyListener(keyAdapter);

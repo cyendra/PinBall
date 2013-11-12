@@ -14,6 +14,7 @@ public class BallService {
 	private Brick[][] bricks = null;
 	private int width;
 	private int height;
+	KeyEvent nowKey = null;
 	BallFrame ballFrame = null;
 	
 	public BallService() {
@@ -44,9 +45,7 @@ public class BallService {
 				x = i * imageSize;
 				y = j * imageSize;
 				isDisable = Math.random() > 0.8 ? true : false;
-				if (isDisable) {
-					random = 0;
-				}
+				if (isDisable) random = 0;
 				Brick brick = new Brick(path, random, x, y);
 				brick.setDisable(isDisable);
 				brick.setX(x);
@@ -69,6 +68,7 @@ public class BallService {
 	}
 	
 	public void run() {
+		setStickPos(nowKey);
 		setBallPos();
 		setMagicPos();
 	}
@@ -89,66 +89,58 @@ public class BallService {
 
 	private void setStickWidth(Magic magic) {
 		if (isHitStick(magic)) {
-			// 道具的作用
 			magic.magicDo(stick);
 		}
 	}
 
 	private boolean isHitStick(BallComponent bc) {
-		// 获取图片对象
 		Image tempImage = bc.getImage();
-		// 如果与档板有碰撞
-		if (bc.getX() + tempImage.getWidth(null) > stick.getX()
-				&& bc.getX() < stick.getX() + stick.getPreWidth()
-				&& bc.getY() + tempImage.getHeight(null) > stick.getY()) {
+		if (bc.getX() + tempImage.getWidth(null) > stick.getX() && 
+			bc.getX() < stick.getX() + stick.getPreWidth() &&
+			bc.getY() + tempImage.getHeight(null) > stick.getY()) {
 			return true;
 		}
 		return false;
 	}
-
+	
+	private boolean isHitBrick(Brick brick) {
+		if (brick.isDisable()) return false;
+		double ballX = ball.getX() + ball.getImage().getWidth(null) / 2;
+		double ballY = ball.getY() + ball.getImage().getHeight(null) / 2;
+		double brickX = brick.getX() + brick.getImage().getWidth(null) / 2;
+		double brickY = brick.getY() + brick.getImage().getHeight(null) / 2;
+		double distance = Math.sqrt(Math.pow(ballX - brickX, 2) + Math.pow(ballY - brickY, 2));
+		if (distance < (ball.getImage().getWidth(null) + brick.getImage().getWidth(null)) / 2) {
+			brick.setDisable(true);
+			return true;
+		}
+		return false;
+	}
+	
 	private void setBallPos() {
-		// 正数的数度
 		int absSpeedX = Math.abs(ball.getSpeedX());
 		int absSpeedY = Math.abs(ball.getSpeedY());
-		// 如果游戏已经开始而且没有结束
 		if (ball.isStarted()) {
-			// 如果小球碰到左边界
 			if (ball.getX() - absSpeedX < 0) {
-				// 重新设置x坐标
 				ball.setX(ball.getImage().getWidth(null));
-				// 把x方向的速度设为反方向
 				ball.setSpeedX(-ball.getSpeedX());
 			}
-			// 如果小球碰到右边界
-			if (ball.getX() + absSpeedX > width
-					- ball.getImage().getWidth(null)) {
-				// 重新设置x坐标
+			if (ball.getX() + absSpeedX > width - ball.getImage().getWidth(null)) {
 				ball.setX(width - ball.getImage().getWidth(null) * 2);
-				// 把x方向的速度设为反方向
 				ball.setSpeedX(-ball.getSpeedX());
 			}
-			// 如果小球碰到上边界
 			if (ball.getY() - absSpeedY < 0) {
-				// 重新设置y坐标
 				ball.setY(ball.getImage().getWidth(null));
-				// 把y方向的速度设为反方向
 				ball.setSpeedY(-ball.getSpeedY());
 			}
-			// 如果小球碰到下边界
-			if (ball.getY() + absSpeedY > height
-					- stick.getImage().getHeight(null)) {
-				// 如果小球与档板有碰撞
+			if (ball.getY() + absSpeedY > height - stick.getImage().getHeight(null)) {
 				if (isHitStick(ball)) {
-					// 重新设置y坐标
 					ball.setY(height - ball.getImage().getHeight(null) * 2);
-					// 把y方向的速度设为反方向
 					ball.setSpeedY(-ball.getSpeedY());
 				}
 			}
-			// 与砖块碰撞后的运动
-			for (int i = bricks.length - 1; i > -1; i--) {
-				for (int j = bricks[i].length - 1; j > -1; j--) {
-					// 如果小球与砖块有碰撞
+			for (int i = bricks.length - 1; i >= 0; i--) {
+				for (int j = bricks[i].length - 1; j >= 0; j--) {
 					if (isHitBrick(bricks[i][j])) {
 						if (ball.getSpeedY() > 0) {
 							ball.setSpeedY(-ball.getSpeedY());
@@ -156,64 +148,37 @@ public class BallService {
 					}
 				}
 			}
-			// 结束游戏
 			if (ball.getY() > height) {
 				ball.setStop(true);
 			}
-
-			// 设置x坐标
-			ball.setX(ball.getX() - (int) (Math.random() * 2)
-					- ball.getSpeedX());
-			// 设置y坐标
-			ball.setY(ball.getY() - (int) (Math.random() * 2)
-					- ball.getSpeedY());
+			ball.setX(ball.getX() - (int)(Math.random() * 2) - ball.getSpeedX());
+			ball.setY(ball.getY() - (int)(Math.random() * 2) - ball.getSpeedY());
 		}
 	}
-
-	private boolean isHitBrick(Brick brick) {
-		if (brick.isDisable()) {
-			return false;
-		}
-		// ball的圆心x坐标
-		double ballX = ball.getX() + ball.getImage().getWidth(null) / 2;
-		// ball的圆心y坐标
-		double ballY = ball.getY() + ball.getImage().getHeight(null) / 2;
-		// brick的中心x坐标
-		double brickX = brick.getX() + brick.getImage().getWidth(null) / 2;
-		// brick的中心y坐标
-		double brickY = brick.getY() + brick.getImage().getHeight(null) / 2;
-		// 两个坐标点的距离
-		double distance = Math.sqrt(Math.pow(ballX - brickX, 2)
-				+ Math.pow(ballY - brickY, 2));
-		// 如果两个图形重叠，返回true;
-		if (distance < (ball.getImage().getWidth(null) + brick.getImage()
-				.getWidth(null)) / 2) {
-			// 使brick无效
-			brick.setDisable(true);
-			return true;
-
-		}
-		return false;
+	public void setKeyPress(KeyEvent ke) {
+		nowKey = ke;
 	}
-
+	public void setKeyReleas(KeyEvent ke) {
+		nowKey = null;
+	}
 	public void setStickPos(KeyEvent ke) {
+		if (ke == null) return;
 		ball.setStarted(true);
 		if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
-			if (stick.getX() - Stick.SPEED > 0) {
-				stick.setX(stick.getX() - Stick.SPEED);
+			if (stick.getX() - stick.getSpeed() > 0) {
+				stick.setX(stick.getX() - stick.getSpeed());
 			}
 		}
 		if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
-			if (stick.getX() + Stick.SPEED < width - stick.getPreWidth()) {
-				stick.setX(stick.getX() + Stick.SPEED);
-				// ballFrame.getBallGame().reStart( ballFrame );
+			if (stick.getX() + stick.getSpeed() < width - stick.getPreWidth()) {
+				stick.setX(stick.getX() + stick.getSpeed());
 			}
 		}
-
 		if (ke.getKeyCode() == KeyEvent.VK_F2) {
 			try {
 				ballFrame.initialize();
-			} catch (IOException e) {
+			} 
+			catch (IOException e) {
 				System.out.println(e.getMessage());
 			}
 		}

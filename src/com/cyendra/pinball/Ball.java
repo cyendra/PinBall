@@ -4,8 +4,8 @@ import java.io.IOException;
 
 public class Ball extends BallComponent {
 	
-	private int speedY = 10;
-	private int speedX = 8;
+	private int speedY = 3;
+	private int speedX = 2;
 	private boolean started = false;
 	private boolean stop = false;
 	
