@@ -13,8 +13,6 @@ public class BallFrame extends JFrame {
 	private final int BALLPANEL_HEIGHT = 400;
 	
 	private BallPanel ballPanel = null;
-	private Image stick = null;
-	private int stickX = -1;
 	private BallService service = null;
 	Timer timer = null;
 	

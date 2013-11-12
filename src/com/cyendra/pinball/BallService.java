@@ -16,7 +16,7 @@ public class BallService {
 	private int height;
 	BallFrame ballFrame = null;
 	
-	private BallService() {
+	public BallService() {
 		super();
 	}
 	
@@ -199,13 +199,13 @@ public class BallService {
 	public void setStickPos(KeyEvent ke) {
 		ball.setStarted(true);
 		if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
-			if (stick.getX() - stick.SPEED > 0) {
-				stick.setX(stick.getX() - stick.SPEED);
+			if (stick.getX() - Stick.SPEED > 0) {
+				stick.setX(stick.getX() - Stick.SPEED);
 			}
 		}
 		if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
-			if (stick.getX() + stick.SPEED < width - stick.getPreWidth()) {
-				stick.setX(stick.getX() + stick.SPEED);
+			if (stick.getX() + Stick.SPEED < width - stick.getPreWidth()) {
+				stick.setX(stick.getX() + Stick.SPEED);
 				// ballFrame.getBallGame().reStart( ballFrame );
 			}
 		}
